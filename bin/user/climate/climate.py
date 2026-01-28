@@ -94,7 +94,7 @@ class Climate(StdService):
                 self.stations[station_id] = {'thread': None, 'launch_time': 0,
                                              'downloader': downloader}
 
-                # Fetch data for this station
+                # Fetch initial data for this station
                 self.fetch_data(db_conn, station_id, datetime.date.today())
 
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)

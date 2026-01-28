@@ -70,16 +70,18 @@ def fetch_data(database_dict, table_name, station_id, current_date):
     """Worker thread to fetch ACIS station metadata and historical data, then store
      in the database."""
 
+    # Update both the station_metadata and the station_data tables as one transaction.
     with weedb.connect(database_dict) as db_conn:
-        # First get the metadata for the station:
-        get_metadata(db_conn, station_id)
+        with weedb.Transaction(db_conn) as cursor:
+            # First get the metadata for the station...
+            get_metadata(cursor, station_id)
 
-        # Then the data itself:
-        get_data(db_conn, station_id, table_name, current_date)
+            # ...then the data itself:
+            get_data(cursor, station_id, table_name, current_date)
 
 
-def get_metadata(db_conn, station_id):
-    """Return a dictionary containing metadata about the given station. """
+def get_metadata(cursor, station_id):
+    """Insert metadata about the given station into the database. """
 
     # Construct JSON payload:
     payload = json.loads('{"sids":"%s"}' % station_id)
@@ -96,18 +98,17 @@ def get_metadata(db_conn, station_id):
             'longitude': data['ll'][0],
             'altitude': data['elev']
             }
-    with db_conn.cursor() as cursor:
-        # Insert it into the station_metadata table
-        cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?);",
-                       (meta['station_id'],
-                        meta['station_name'],
-                        meta['station_location'],
-                        meta['latitude'], meta['longitude'],
-                        meta['altitude']))
-        log.debug(f"Metadata for station {station_id} inserted into database.")
+    # Insert it into the station_metadata table
+    cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?);",
+                   (meta['station_id'],
+                    meta['station_name'],
+                    meta['station_location'],
+                    meta['latitude'], meta['longitude'],
+                    meta['altitude']))
+    log.debug(f"Metadata for station {station_id} inserted into database.")
 
 
-def get_data(db_conn, station_id, table_name, current_date):
+def get_data(cursor, station_id, table_name, current_date):
     """Get the historical data for the given station and store it in the database."""
 
     # Construct JSON query payload:
@@ -117,18 +118,17 @@ def get_data(db_conn, station_id, table_name, current_date):
     if not results:
         return
 
-    with weedb.Transaction(db_conn) as cursor:
-        # 1. Clear the table. This very fast in SQLite and does not require rebuilding indexes.
-        cursor.execute(f"DELETE FROM {table_name} WHERE station_id = ?;", (station_id,))
+    # 1. Clear the table. This is very fast in SQLite and does not require rebuilding indexes.
+    cursor.execute(f"DELETE FROM {table_name} WHERE station_id = ?;", (station_id,))
 
-        # 2. Now batch insert the new data.
-        for rec in gen_acis_records(results, station_id):
-            # The record has 9 elements. Match the 9 columns in CREATE_CLIMATE_DATA
-            cursor.execute(f"INSERT INTO {table_name} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                           rec)
-        # 3. Update the download date in the metadata table.
-        cursor.execute(f"INSERT OR REPLACE INTO {table_name}_metadata (name, value) "
-                       "VALUES ('download_date', ?);", (current_date.isoformat(),))
+    # 2. Now batch insert the new data.
+    for rec in gen_acis_records(results, station_id):
+        # The record has 9 elements. Match the 9 columns in CREATE_CLIMATE_DATA
+        cursor.execute(f"INSERT INTO {table_name} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                       rec)
+    # 3. Update the download date in the metadata table.
+    cursor.execute(f"INSERT OR REPLACE INTO {table_name}_metadata (name, value) "
+                   "VALUES ('download_date', ?);", (current_date.isoformat(),))
 
 
 def gen_acis_records(results, station_id):
