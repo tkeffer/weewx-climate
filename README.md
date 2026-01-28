@@ -35,12 +35,13 @@ You can find more information about your chosen station in the NOAA
 ## Database schema
 
 ```
-month day usUnits obsType stat reduction value year
-   01  01       1 outTemp high min          41 2018
-   01  01       1 outTemp high avg          38 null
-   01  01       1 outTemp high max          55 2004
-   01  01       1 rain    sum  avg        0.12 null
-   01  01       1 rain    sum  max        3.24 2009
+station_id  month day usUnits obsType stat reduction value year
+USC00040983    01  01       1 outTemp high       min    41 2018
+USC00040983    01  01       1 outTemp high       avg    38 null
+USC00040983    01  01       1 outTemp high       max    55 2004
+USC00040983    01  01       1    rain  sum       avg  0.12 null
+USC00040983    01  01       1    rain  sum       max  3.24 2009
+...
 ```
 
 ## Tags
