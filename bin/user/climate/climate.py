@@ -42,8 +42,26 @@ CREATE_STATION_METADATA = "CREATE TABLE station_metadata " \
 default_binding_dict = {
     'database': 'climate_sqlite',
     'table_name': 'acis_data',
-    'manager': 'weewx.manager.Manager'  # Not actually used
+    'manager': 'user.climate.climate.StatsManager'
 }
+
+
+class StatsManager(weewx.manager.Manager):
+    """Specialized manager for the climate database. The base class manager is designed to
+    handle time-series type data, while we need to look things up by station_id and date."""
+
+    @classmethod
+    def open_with_create(cls, database_dict, table_name, schema=None):
+        """Overrides base class method because we use a different kind of schema."""
+        setup_climate_database(database_dict, table_name)
+        connection = weedb.connect(database_dict)
+        # Create an instance of the right class and return it:
+        dbmanager = cls(connection, table_name=table_name, schema=None)
+        return dbmanager
+
+    def __init__(self, connection, table_name, schema=None):
+        self.connection = connection
+        self.table_name = table_name
 
 
 class Climate(StdService):
@@ -68,17 +86,13 @@ class Climate(StdService):
 
         self.stations = {}
 
-        self.manager_dict \
-            = weewx.manager.get_manager_dict_from_config(config_dict,
-                                                         data_binding='acis_binding',
-                                                         default_binding_dict=default_binding_dict)
-        database_dict = self.manager_dict['database_dict']
-        table_name = self.manager_dict['table_name']
-
-        # Create the climate database if it doesn't already exist:'
-        setup_climate_database(database_dict, table_name)
-
-        with weedb.connect(self.manager_dict['database_dict']) as db_conn:
+        # TODO: the binding name should be retrieved from the downloader
+        # TODO: should be refactored so that each station gets its own db_manager
+        with weewx.manager.open_manager_with_config(
+                config_dict,
+                data_binding='acis_binding',
+                initialize=True,
+                default_binding_dict=default_binding_dict) as db_manager:
 
             # Iterate through the stations
             for station_id in climate_dict.sections:
@@ -95,7 +109,7 @@ class Climate(StdService):
                                              'downloader': downloader}
 
                 # Fetch initial data for this station
-                self.fetch_data(db_conn, station_id, datetime.date.today())
+                self.fetch_data(db_manager, station_id, datetime.date.today())
 
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
 
@@ -105,20 +119,21 @@ class Climate(StdService):
 
         # Get the date from the current record:
         current_date = datetime.datetime.fromtimestamp(event.record['dateTime']).date()
-        table_name = self.manager_dict['table_name']
 
-        with weedb.connect(self.manager_dict['database_dict']) as db_conn:
-            for station_id in self.stations:
-                self.download_data(db_conn, table_name, station_id, current_date)
+        # TODO: the binding name should be retrieved from the downloader
+        db_manager = self.engine.db_binder.get_manager('acis_binding')
 
-    def fetch_data(self, db_conn, table_name, station_id, current_date):
+        for station_id in self.stations:
+            self.fetch_data(db_manager, station_id, current_date)
+
+    def fetch_data(self, db_manager, station_id, current_date):
         """If the data is not current, launch a thread to download it."""
 
         # Determine the last download time.
-        with db_conn.cursor() as cursor:
+        with db_manager.connection.cursor() as cursor:
             cursor.execute("SELECT value "
                            "FROM %s_metadata "
-                           "WHERE name = 'download_date';" % table_name)
+                           "WHERE name = 'download_date';" % db_manager.table_name)
             results = cursor.fetchone()
             download_date = results[0] if results else None
         if download_date and download_date >= current_date.isoformat():
@@ -172,3 +187,11 @@ def setup_climate_database(database_dict, table_name):
                            "VALUES ('version', ?);" % table_name, (VERSION,))
             cursor.execute(CREATE_STATION_METADATA)
         log.debug("Climate database table %s initialized.", table_name)
+
+
+if __name__ == "__main__":
+    import weecfg
+
+    config_path, config_dict = weecfg.read_config(None)
+
+    climate = Climate(None, config_dict)
