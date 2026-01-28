@@ -3,7 +3,7 @@
 #
 #    See the file LICENSE.txt for your full rights.
 #
-"""Installer for the WeeWX ACIS downloader"""
+"""Installer for the WeeWX climatological data downloader"""
 
 from io import StringIO
 
@@ -14,11 +14,11 @@ CONFIG = """
 [DataBindings]
     
     [[acis_binding]]
-        # The database must match one of the sections in [Databases].
+        # The climate database must match one of the sections in [Databases].
         database = climate_sqlite
         # The name of the table within the database.
         table_name = acis_data
-        # Not actually used by the ACIS downloader:
+        # The following is not actually used
         manager = weewx.manager.Manager
 
 [Databases]
@@ -30,13 +30,14 @@ CONFIG = """
 
 ##############################################################################
 
-# The ACIS downloader, for downloading climatological data from ACIS.
+# The climate downloader, for downloading climatological data from ACIS and other sources.
 
-[ACIS]
-
-    station_id = USC00354003
-    enabled = true
-    binding = acis_binding
+[Climate]
+    # Replace with the ID from the ACIS database of a nearby station:
+    [[USC00040983]]
+        enabled = true
+        binding = acis_binding
+        downloader = user.climate.acis
 
 """
 

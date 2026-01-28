@@ -1,13 +1,11 @@
-# ACIS downloader
+# Climate downloader
 
 ## About
 
-This extension downloads climatological data from the [ACIS
-database](https://www.rcc-acis.org/) to a local SQL database. Unfortunately,
-ACIS is US only.
-
-The extension only downloads data. Another extension is needed to use the data
-within WeeWX reports.
+This extension downloads climatological data, stores them in a local database,
+then makes them available as XType extensions.  While the architecture can
+support multiple download sources, this first version supports only the
+US-centric [ACIS database](https://www.rcc-acis.org/) database.
 
 In the future, I hope to add support for other countries.
 
@@ -23,7 +21,7 @@ You will need a station ID to download data from the ACIS database. The database
 accepts many different kinds of IDs, but one of the more accessible is the list
 of [Global Historical Climatology Network daily
 (GHCNd)](https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt)
-stations. Scan the list and find something useful.
+stations. Scan the list and find something useful. Only USA stations will work.
 
 A more graphical interface is available at the [NOAA National Center for
 Environmental Information's](https://www.ncei.noaa.gov/access/past-weather/)
