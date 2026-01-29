@@ -213,18 +213,3 @@ def do_fetch(payload, url):
         stop = time.time()
         log.debug(f"Fetched JSON data from {url} in {stop - start:.2f} seconds")
         return results
-
-
-if __name__ == "__main__":
-    # this_dir = os.path.dirname(__file__)
-    # with open(os.path.join(this_dir, '../../..', 'results.json'), mode='r') as fd:
-    #     results = json.load(fd)
-    #     for d in gen_acis_records(results):
-    #         print(d)
-
-    database_dict = {'database_name': 'climate.sdb',
-                     'driver': 'weedb.sqlite',
-                     'SQLITE_ROOT': '/Users/tkeffer/weewx-data/archive'}
-
-    # setup_climate_database(database_dict, table_name)
-    # fetch_data(database_dict, table_name, 'USC00040983', datetime.date.today())
