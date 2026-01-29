@@ -6,8 +6,8 @@
 """Create and manage a climatological database for WeeWX.
 
 Typical manager_dict looksl like:
-{'table_name': 'acis_data',
- 'manager': 'weewx.manager.Manager',
+{'table_name': 'climate_data',
+ 'manager': 'user.climate.climate.StatsManager',
  'database_dict': {'database_name': 'climate.sdb', 'driver': 'weedb.sqlite',
                    'SQLITE_ROOT': '/Users/tkeffer/weewx-data/archive'}, 'schema': None}
 
@@ -33,15 +33,18 @@ CREATE_CLIMATE_DATA = "CREATE TABLE %s " \
                       "usUnits INTEGER NOT NULL, obsType TEXT NOT NULL, stat TEXT NOT NULL, " \
                       "reduction TEXT NOT NULL, value REAL, year INTEGER);"
 
+CREATE_CLIMATE_INDEX = "CREATE INDEX %s_index ON climate_data (station_id, month, day);"
+
 CREATE_STATION_METADATA = "CREATE TABLE station_metadata " \
                           "(station_id TEXT PRIMARY KEY, " \
                           "station_name TEXT, " \
                           "station_location TEXT, " \
-                          "latitude REAL, longitude REAL, altitude REAL);"
+                          "latitude REAL, longitude REAL, altitude REAL, " \
+                          "last_download TEXT);"
 
 default_binding_dict = {
     'database': 'climate_sqlite',
-    'table_name': 'acis_data',
+    'table_name': 'climate_data',
     'manager': 'user.climate.climate.StatsManager'
 }
 
@@ -52,7 +55,7 @@ class StatsManager(weewx.manager.Manager):
 
     @classmethod
     def open_with_create(cls, database_dict, table_name, schema=None):
-        """Overrides base class method because we use a different kind of schema."""
+        """Overrides base class method because we use a different kind of schema. """
         setup_climate_database(database_dict, table_name)
         connection = weedb.connect(database_dict)
         # Create an instance of the right class and return it:
@@ -86,27 +89,28 @@ class Climate(StdService):
 
         self.stations = {}
 
-        # TODO: the binding name should be retrieved from the downloader
-        # TODO: should be refactored so that each station gets its own db_manager
-        with weewx.manager.open_manager_with_config(
-                config_dict,
-                data_binding='acis_binding',
-                initialize=True,
-                default_binding_dict=default_binding_dict) as db_manager:
+        # Iterate through the stations
+        for station_id in climate_dict.sections:
+            log.debug(f"Processing station: {station_id}")
+            # Get the downloader name for this station, then import it.
+            try:
+                downloader = importlib.import_module(climate_dict[station_id]['downloader'])
+            except (ImportError, KeyError):
+                log.error(f"Missing downloader for station {station_id}. Skipped.")
+                continue
 
-            # Iterate through the stations
-            for station_id in climate_dict.sections:
-                log.debug(f"Processing station: {station_id}")
-                # Get the downloader name for this station, then import it.
-                try:
-                    downloader = importlib.import_module(climate_dict[station_id]['downloader'])
-                except (ImportError, KeyError):
-                    log.error(f"Missing downloader for station {station_id}. Skipped.")
-                    continue
+            # Stuff to remember:
+            self.stations[station_id] = {
+                'thread': None,
+                'launch_time': None,
+                'downloader': downloader,
+            }
 
-                # Remember everything
-                self.stations[station_id] = {'thread': None, 'launch_time': 0,
-                                             'downloader': downloader}
+            with weewx.manager.open_manager_with_config(
+                    config_dict,
+                    data_binding='climate_binding',
+                    initialize=True,
+                    default_binding_dict=default_binding_dict) as db_manager:
 
                 # Fetch initial data for this station
                 self.fetch_data(db_manager, station_id, datetime.date.today())
@@ -120,22 +124,24 @@ class Climate(StdService):
         # Get the date from the current record:
         current_date = datetime.datetime.fromtimestamp(event.record['dateTime']).date()
 
-        # TODO: the binding name should be retrieved from the downloader
-        db_manager = self.engine.db_binder.get_manager('acis_binding')
-
         for station_id in self.stations:
-            self.fetch_data(db_manager, station_id, current_date)
+            with weewx.manager.open_manager_with_config(
+                    self.config_dict,
+                    data_binding='climate_binding',
+                    initialize=True,
+                    default_binding_dict=default_binding_dict) as db_manager:
+
+                # Update data if necessary.
+                self.fetch_data(db_manager, station_id, current_date)
 
     def fetch_data(self, db_manager, station_id, current_date):
         """If the data is not current, launch a thread to download it."""
 
         # Determine the last download time.
-        with db_manager.connection.cursor() as cursor:
-            cursor.execute("SELECT value "
-                           "FROM %s_metadata "
-                           "WHERE name = 'download_date';" % db_manager.table_name)
-            results = cursor.fetchone()
-            download_date = results[0] if results else None
+        results = db_manager.getSql("SELECT last_download "
+                                    "FROM station_metadata "
+                                    "WHERE station_id = ?;", (station_id,))
+        download_date = results[0] if results else None
         if download_date and download_date >= current_date.isoformat():
             log.debug("Climate data is current.")
             return
@@ -156,11 +162,8 @@ class Climate(StdService):
 
         try:
             self.stations[station_id]['thread'] = threading.Thread(
-                target=self.stations[station_id]['downloader'].fetch_data,
-                args=(self.manager_dict['database_dict'],
-                      self.manager_dict['table_name'],
-                      station_id,
-                      current_date))
+                target=self.stations[station_id]['downloader'].fetch_station_data,
+                args=(self.config_dict, station_id, current_date))
             self.stations[station_id]['thread'].start()
             self.stations[station_id]['launch_time'] = time.time()
         except threading.ThreadError:
@@ -176,17 +179,13 @@ def setup_climate_database(database_dict, table_name):
     except weedb.DatabaseExistsError:
         log.debug("Climate database already exists.")
         return
+    # Create the tables and indexes:
     with weedb.connect(database_dict) as db_conn:
         with weedb.Transaction(db_conn) as cursor:
             cursor.execute(CREATE_CLIMATE_DATA % table_name)
-            cursor.execute("CREATE INDEX %s_idx ON %s (station_id, month, day);"
-                           % (table_name, table_name))
-            cursor.execute("CREATE TABLE %s_metadata "
-                           "(name CHAR(20) NOT NULL PRIMARY KEY, value TEXT);" % table_name)
-            cursor.execute("INSERT INTO %s_metadata (name, value) "
-                           "VALUES ('version', ?);" % table_name, (VERSION,))
+            cursor.execute(CREATE_CLIMATE_INDEX % table_name)
             cursor.execute(CREATE_STATION_METADATA)
-        log.debug("Climate database table %s initialized.", table_name)
+        log.debug("Climate database table initialized.")
 
 
 if __name__ == "__main__":

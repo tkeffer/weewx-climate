@@ -3,12 +3,10 @@
 #
 #    See the file LICENSE.txt for your full rights.
 #
-"""WeeWX XTypes extensions that downloads climatological data from the Applied Climatology
+"""WeeWX XTypes extensions that downloads climatological data from NOAA's Applied Climatology
 Instrument System (ACIS) servers into a local SQL database.
 
 See https://www.rcc-acis.org/docs_webservices.html for a description of the ACIS API.
-
-
 """
 import json
 import logging
@@ -16,11 +14,11 @@ import time
 import urllib.request
 
 import weedb
+import weewx.manager
 from weeutil.weeutil import to_int, to_float
+from user.climate.climate import default_binding_dict, setup_climate_database
 
 log = logging.getLogger(__name__)
-
-VERSION = "0.1"
 
 ACIS_URL = "https://data.rcc-acis.org/StnData"
 ACIS_METADATA_URL = "https://data.rcc-acis.org/StnMeta"
@@ -66,18 +64,21 @@ def acis_struct(station_id):
     }
 
 
-def fetch_data(database_dict, table_name, station_id, current_date):
+def fetch_station_data(config_dict, station_id, current_date):
     """Worker thread to fetch ACIS station metadata and historical data, then store
      in the database."""
 
     # Update both the station_metadata and the station_data tables as one transaction.
-    with weedb.connect(database_dict) as db_conn:
-        with weedb.Transaction(db_conn) as cursor:
+    with weewx.manager.open_manager_with_config(
+            config_dict,
+            data_binding='climate_binding',
+            initialize=True,
+            default_binding_dict=default_binding_dict) as db_manager:
+        with weedb.Transaction(db_manager.connection) as cursor:
             # First get the metadata for the station...
             get_metadata(cursor, station_id)
-
             # ...then the data itself:
-            get_data(cursor, station_id, table_name, current_date)
+            get_data(cursor, station_id, db_manager.table_name, current_date)
 
 
 def get_metadata(cursor, station_id):
@@ -96,15 +97,17 @@ def get_metadata(cursor, station_id):
             'station_location': data['state'],
             'latitude': data['ll'][1],
             'longitude': data['ll'][0],
-            'altitude': data['elev']
+            'altitude': data['elev'],
+            'last_download': None,
             }
     # Insert it into the station_metadata table
-    cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?);",
+    cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?, ?);",
                    (meta['station_id'],
                     meta['station_name'],
                     meta['station_location'],
                     meta['latitude'], meta['longitude'],
-                    meta['altitude']))
+                    meta['altitude'],
+                    meta['last_download']))
     log.debug(f"Metadata for station {station_id} inserted into database.")
 
 
@@ -118,17 +121,18 @@ def get_data(cursor, station_id, table_name, current_date):
     if not results:
         return
 
-    # 1. Clear the table. This is very fast in SQLite and does not require rebuilding indexes.
-    cursor.execute(f"DELETE FROM {table_name} WHERE station_id = ?;", (station_id,))
+    # 1. Clear entries for this station ID
+    cursor.execute(f"DELETE FROM %s WHERE station_id = ?;" % table_name, (station_id,))
 
     # 2. Now batch insert the new data.
     for rec in gen_acis_records(results, station_id):
         # The record has 9 elements. Match the 9 columns in CREATE_CLIMATE_DATA
-        cursor.execute(f"INSERT INTO {table_name} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                       rec)
-    # 3. Update the download date in the metadata table.
-    cursor.execute(f"INSERT OR REPLACE INTO {table_name}_metadata (name, value) "
-                   "VALUES ('download_date', ?);", (current_date.isoformat(),))
+        cursor.execute(f"INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);" % table_name, rec)
+
+    # 3. Update the download date in the station metadata table.
+    cursor.execute(f"UPDATE station_metadata SET last_download = ? WHERE station_id = ?;",
+                   (current_date.isoformat(), station_id))
+    log.debug(f"Climate data for station {station_id} inserted into database.")
 
 
 def gen_acis_records(results, station_id):
@@ -218,12 +222,9 @@ if __name__ == "__main__":
     #     for d in gen_acis_records(results):
     #         print(d)
 
-    import datetime
-    from user.climate.climate import setup_climate_database
-
     database_dict = {'database_name': 'climate.sdb',
                      'driver': 'weedb.sqlite',
                      'SQLITE_ROOT': '/Users/tkeffer/weewx-data/archive'}
 
-    setup_climate_database(database_dict, 'acis_data')
-    fetch_data(database_dict, 'acis_data', 'USC00040983', datetime.date.today())
+    # setup_climate_database(database_dict, table_name)
+    # fetch_data(database_dict, table_name, 'USC00040983', datetime.date.today())
