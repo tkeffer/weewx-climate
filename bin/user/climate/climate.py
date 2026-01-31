@@ -203,3 +203,11 @@ def setup_climate_database(database_dict, table_name):
             cursor.execute(CREATE_CLIMATE_INDEX % table_name)
             cursor.execute(CREATE_STATION_METADATA)
         log.debug("Climate database table initialized.")
+
+if __name__ == "__main__":
+    import weecfg
+    from weewx.engine import DummyEngine
+
+    config_path, config_dict = weecfg.read_config(None)
+
+    climate = Climate(DummyEngine(config_dict), config_dict)

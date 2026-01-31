@@ -24,11 +24,12 @@ ACIS_URL = "https://data.rcc-acis.org/StnData"
 ACIS_METADATA_URL = "https://data.rcc-acis.org/StnMeta"
 
 
-def acis_element(mint_maxt, reduce_method):
+def acis_element(stat, reduce_method):
     """Return a dictionary representing an ACIS query element.
     
     Args:
-        mint_maxt (str): Either 'mint' (minimum temperature) or 'maxt' (maximum temperature).
+        stat (str): The statistical type to be summarized. Typically, mint, maxt,
+            or pcpn (precipitation).
         reduce_method (str): The reduction method to apply to the data.
             Either 'min', 'max', or 'mean'.
 
@@ -37,7 +38,7 @@ def acis_element(mint_maxt, reduce_method):
         would ask for the max daily low temperature (i.e., the "high low" for the day)
     """
     return {
-        'name': mint_maxt,
+        'name': stat,
         'interval': 'dly',
         'duration': 1,
         'smry': {'reduce': reduce_method, 'add': 'date'},
@@ -59,7 +60,8 @@ def acis_struct(station_id):
             acis_element('maxt', 'min'),
             acis_element('mint', 'mean'),
             acis_element('mint', 'max'),
-            acis_element('mint', 'min')
+            acis_element('mint', 'min'),
+            acis_element('pcpn', 'max'),
         ]
     }
 
@@ -170,12 +172,13 @@ def gen_acis_records(results, station_id):
 
     # Now process the actual summary data. The order the results will appear in is set by
     # function acis_struct() above.
-    ordering = [('high', 'avg'), ('high', 'max'), ('high', 'min'),
-                ('low', 'avg'), ('low', 'max'), ('low', 'min')]
+    ordering = [('high', 'avg', 'outTemp'), ('high', 'max', 'outTemp'), ('high', 'min', 'outTemp'),
+                ('low', 'avg', 'outTemp'), ('low', 'max', 'outTemp'), ('low', 'min', 'outTemp'),
+                ('sum', 'max', 'precip')]
 
     # Scan through the 6 different statistics and reduction methods returned from the server
     for stat_tuple, element_list in zip(ordering, results['smry']):
-        stat, reduction = stat_tuple
+        stat, reduction, obs_type = stat_tuple
         for day_tuple in element_list:
             # The value is in the first element. It's a string, so convert it to a float. Watch
             # out for missing values (marked with 'M'):
@@ -190,7 +193,6 @@ def gen_acis_records(results, station_id):
                 year = None
             # In this version, everything is in US units.
             usUnits = 1
-            obs_type = 'outTemp'
             yield (station_id, month, day, usUnits, obs_type,
                    stat, reduction, value, year)
 

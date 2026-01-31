@@ -55,3 +55,11 @@ $day.rain.sum_avg   <-- The average rainfall for this particular day from the AC
 $day.rain.sum_max   <-- The maximum rainfall for this particular day from the ACIS database
 ```
 
+## Alternate tags
+
+$climate.day.outTemp.avg.high
+$climate.day.outTemp.min.high
+$climate.day.outTemp.max.high
+$climate.day.outTemp.max.high.year
+$climate.day.precip.max
+$climate.day.precip.max.year
