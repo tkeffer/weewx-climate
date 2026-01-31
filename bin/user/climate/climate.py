@@ -5,7 +5,7 @@
 #
 """Create and manage a climatological database for WeeWX.
 
-Typical manager_dict looksl like:
+Typical manager_dict looks like:
 {'table_name': 'climate_data',
  'manager': 'user.climate.climate.StatsManager',
  'database_dict': {'database_name': 'climate.sdb', 'driver': 'weedb.sqlite',
@@ -21,8 +21,11 @@ import time
 import weedb
 import weewx
 import weewx.manager
+import weewx.xtypes
 from weeutil.weeutil import to_bool, to_int
 from weewx.engine import StdService
+
+import user.climate.clxtype
 
 VERSION = '1.0'
 
@@ -47,6 +50,8 @@ default_binding_dict = {
     'table_name': 'climate_data',
     'manager': 'user.climate.climate.StatsManager'
 }
+
+default_station_id = None
 
 
 class StatsManager(weewx.manager.Manager):
@@ -115,6 +120,15 @@ class Climate(StdService):
                 # Fetch initial data for this station
                 self.fetch_data(db_manager, station_id, datetime.date.today())
 
+                # Set the default station ID to the first station
+                global default_station_id
+                if not default_station_id:
+                    default_station_id = station_id
+
+        # Register the XType
+        self.xt = user.climate.clxtype.ClimateXType()
+        weewx.xtypes.xtypes.append(self.xt)
+
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
 
     def new_archive_record(self, event):
@@ -130,7 +144,6 @@ class Climate(StdService):
                     data_binding='climate_binding',
                     initialize=True,
                     default_binding_dict=default_binding_dict) as db_manager:
-
                 # Update data if necessary.
                 self.fetch_data(db_manager, station_id, current_date)
 
@@ -169,6 +182,10 @@ class Climate(StdService):
         except threading.ThreadError:
             log.error("Unable to launch update thread.")
             self.stations[station_id]['thread'] = None
+
+    def shutDown(self):
+        # Engine is shutting down. Remove the XType registration
+        weewx.xtypes.xtypes.remove(self.xt)
 
 
 def setup_climate_database(database_dict, table_name):

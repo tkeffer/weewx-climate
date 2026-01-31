@@ -1,0 +1,171 @@
+##
+## Demonstration skin for climatological data from the extension weewx-climate
+##
+## This skin can be copied, modified, and re-distributed without restriction.
+## -Tom Keffer 2026
+##
+#errorCatcher Echo
+#encoding UTF-8
+##
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate records for today</title>
+    <style>
+        :root {
+            --high-high: #b91c1c; /* Deep Red */
+            --low-high: #f97316;  /* Orange */
+            --high-low: #0ea5e9;  /* Light Blue */
+            --low-low: #1e3a8a;   /* Deep Blue */
+            --avg: #475569;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .almanac-card {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .date-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .station-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .map-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section-label {
+            padding: 20px 30px 10px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .row {
+            display: flex;
+            padding: 20px 30px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+        }
+
+        .row:last-child { border-bottom: none; }
+
+        .stat-group { flex: 1; }
+
+        .stat-label {
+            display: block;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .year {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 8px;
+        }
+
+        /* Color Coding */
+        .hh { color: var(--high-high); }
+        .lh { color: var(--low-high); }
+        .hl { color: var(--high-low); }
+        .ll { color: var(--low-low); }
+        .avg-text { color: var(--avg); }
+    </style>
+</head>
+<body>
+
+<div class="almanac-card">
+    <div class="header">
+        <h1 class="date-title">$current.dateTime</h1>
+        <div class="station-info">
+            Station: <strong>$climate.location ($climate.station_id)</strong><br>
+            $climate.latitude, $climate.longitude, $climate.elevation
+        </div>
+        <a href="https://www.google.com/maps/search/?api=1&query=$climate.latitude,$climate.longitude" target="_blank" class="map-btn">📍 View Station Location</a>
+    </div>
+
+    <div class="section-label">High temperatures</div>
+    <div class="row">
+        <div class="stat-group">
+            <span class="stat-label">Record High (High-High)</span>
+            <span class="stat-val hh">$day(data_binding='climate_binding').outTemp.high_high/span><span class="year">in $day(data_binding='climate_binding').outTemp.high_high_year</span>
+        </div>
+        <div class="stat-group">
+            <span class="stat-label">Coolest High (Low-High)</span>
+            <span class="stat-val lh">$day(data_binding='climate_binding').outTemp.low_high</span><span class="year">in $day(data_binding='climate_binding').outTemp.low_high_year</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="stat-group">
+            <span class="stat-label">Average High</span>
+            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.avg_high</span>
+        </div>
+    </div>
+
+    <div class="section-label">Low temperatures</div>
+    <div class="row">
+        <div class="stat-group">
+            <span class="stat-label">Warmest Low (High-Low)</span>
+            <span class="stat-val hl">$day(data_binding='climate_binding').outTemp.high_low</span><span class="year">in $day(data_binding='climate_binding').outTemp.high_low_year</span>
+        </div>
+        <div class="stat-group">
+            <span class="stat-label">Record Low (Low-Low)</span>
+            <span class="stat-val ll">$day(data_binding='climate_binding').outTemp.low_low/span><span class="year">in $day(data_binding='climate_binding').outTemp.low_low_year</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="stat-group">
+            <span class="stat-label">Average Low</span>
+            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.avg_low</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
