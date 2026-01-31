@@ -134,7 +134,7 @@
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Record High (High-High)</span>
-            <span class="stat-val hh">$day(data_binding='climate_binding').outTemp.high_high/span><span class="year">in $day(data_binding='climate_binding').outTemp.high_high_year</span>
+            <span class="stat-val hh">$day(data_binding='climate_binding').outTemp.high_high</span><span class="year">in $day(data_binding='climate_binding').outTemp.high_high_year</span>
         </div>
         <div class="stat-group">
             <span class="stat-label">Coolest High (Low-High)</span>
@@ -144,7 +144,7 @@
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Average High</span>
-            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.avg_high</span>
+            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.high_avg</span>
         </div>
     </div>
 
@@ -156,13 +156,13 @@
         </div>
         <div class="stat-group">
             <span class="stat-label">Record Low (Low-Low)</span>
-            <span class="stat-val ll">$day(data_binding='climate_binding').outTemp.low_low/span><span class="year">in $day(data_binding='climate_binding').outTemp.low_low_year</span>
+            <span class="stat-val ll">$day(data_binding='climate_binding').outTemp.low_low</span><span class="year">in $day(data_binding='climate_binding').outTemp.low_low_year</span>
         </div>
     </div>
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Average Low</span>
-            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.avg_low</span>
+            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.low_avg</span>
         </div>
     </div>
 </div>

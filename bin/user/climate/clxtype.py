@@ -9,6 +9,7 @@ import datetime
 import weewx.xtypes
 from weewx.units import ValueTuple
 
+
 class ClimateXType(weewx.xtypes.XType):
     # The set of all valid aggregation types:
     climate_aggs = {
@@ -23,12 +24,6 @@ class ClimateXType(weewx.xtypes.XType):
         "WHERE station_id = ? "
         "AND month = ? AND day = ? "
         "AND stat = ? AND reduction = ?;")
-
-    # year_sql_stmt = (
-    #     "SELECT year FROM %s "
-    #     "WHERE station_id = ? "
-    #     "AND month = ? AND day = ? "
-    #     "AND stats = ? AND reduction = ?;")
 
     def get_aggregate(self, obs_type, timespan, aggregate_type, db_manager, **option_dict):
 
@@ -46,7 +41,7 @@ class ClimateXType(weewx.xtypes.XType):
         day = datetime.date.fromtimestamp(timespan.start)
 
         # Figure out which stats and reduction to use:
-        stats, reduction = aggregate_type.split('_', maxsplit=1)
+        stats, reduction = aggregate_type.split('_')[0:2]
         if reduction == 'high':
             reduction = 'max'
         elif reduction == 'low':
@@ -60,7 +55,7 @@ class ClimateXType(weewx.xtypes.XType):
             value = us_units = year = None
 
         if 'year' in aggregate_type:
-            return ValueTuple(year, None, None)
+            return ValueTuple(year, 'count', 'group_count')
 
         std_group = weewx.units.std_groups[us_units]
         unit = std_group['group_temperature']
