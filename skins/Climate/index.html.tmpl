@@ -122,10 +122,10 @@
 
 <div class="almanac-card">
     <div class="header">
-        <h1 class="date-title">$current.dateTime</h1>
+        <h1 class="date-title">$current.dateTime.format("%x")</h1>
         <div class="station-info">
-            Station: <strong>$climate.location ($climate.station_id)</strong><br>
-            $climate.latitude, $climate.longitude, $climate.elevation
+            Station: <strong>$climate.name, $climate.location ($climate.station_id)</strong><br>
+            $climate.latitude, $climate.longitude, $climate.altitude
         </div>
         <a href="https://www.google.com/maps/search/?api=1&query=$climate.latitude,$climate.longitude" target="_blank" class="map-btn">📍 View Station Location</a>
     </div>
@@ -134,17 +134,17 @@
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Record High (High-High)</span>
-            <span class="stat-val hh">$day(data_binding='climate_binding').outTemp.high_high</span><span class="year">in $day(data_binding='climate_binding').outTemp.high_high_year</span>
+            <span class="stat-val hh">$climate.day.outTemp.high.max</span><span class="year">in $climate.day.outTemp.high.maxtime</span>
         </div>
         <div class="stat-group">
             <span class="stat-label">Coolest High (Low-High)</span>
-            <span class="stat-val lh">$day(data_binding='climate_binding').outTemp.low_high</span><span class="year">in $day(data_binding='climate_binding').outTemp.low_high_year</span>
+            <span class="stat-val lh">$climate.day.outTemp.high.min</span><span class="year">in $climate.day.outTemp.high.mintime</span>
         </div>
     </div>
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Average High</span>
-            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.high_avg</span>
+            <span class="stat-val avg-text">$climate.day.outTemp.high.avg</span>
         </div>
     </div>
 
@@ -152,17 +152,24 @@
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Warmest Low (High-Low)</span>
-            <span class="stat-val hl">$day(data_binding='climate_binding').outTemp.high_low</span><span class="year">in $day(data_binding='climate_binding').outTemp.high_low_year</span>
+            <span class="stat-val hl">$climate.day.outTemp.low.max</span><span class="year">in $climate.day.outTemp.low.maxtime</span>
         </div>
         <div class="stat-group">
             <span class="stat-label">Record Low (Low-Low)</span>
-            <span class="stat-val ll">$day(data_binding='climate_binding').outTemp.low_low</span><span class="year">in $day(data_binding='climate_binding').outTemp.low_low_year</span>
+            <span class="stat-val ll">$climate.day.outTemp.low.min</span><span class="year">in $climate.day.outTemp.low.mintime</span>
         </div>
     </div>
     <div class="row">
         <div class="stat-group">
             <span class="stat-label">Average Low</span>
-            <span class="stat-val avg-text">$day(data_binding='climate_binding').outTemp.low_avg</span>
+            <span class="stat-val avg-text">$climate.day.outTemp.low.avg</span>
+        </div>
+    </div>
+    <div class="section-label">Precipitation</div>
+    <div class="row">
+        <div class="stat-group">
+            <span class="stat-label">Max</span>
+            <span class="stat-val hl">$climate.day.precip.sum.max</span><span class="year">in $climate.day.precip.sum.maxtime</span>
         </div>
     </div>
 </div>

@@ -13,13 +13,13 @@ from weecfg.extension import ExtensionInstaller
 CONFIG = """
 [DataBindings]
     
-    [[acis_binding]]
+    [[climate_binding]]
         # The climate database must match one of the sections in [Databases].
         database = climate_sqlite
         # The name of the table within the database.
-        table_name = acis_data
-        # The following is not actually used
-        manager = weewx.manager.Manager
+        table_name = climate_data
+        # Specialized databases manager used by the extension
+        manager = user.climate.climate.StatsManager
 
 [Databases]
     
@@ -33,30 +33,38 @@ CONFIG = """
 # The climate downloader, for downloading climatological data from ACIS and other sources.
 
 [Climate]
-    # Replace with the ID from the ACIS database of a nearby station:
+    # Replace with the ACIS ID of a nearby station. See the README for more info.
     [[USC00040983]]
         enabled = true
-        binding = acis_binding
         downloader = user.climate.acis
 
 """
 
-acis_dict = configobj.ConfigObj(StringIO(CONFIG))
+climate_dict = configobj.ConfigObj(StringIO(CONFIG))
 
 
 def loader():
-    return ACISInstaller()
+    return ClimateInstaller()
 
 
-class ACISInstaller(ExtensionInstaller):
+class ClimateInstaller(ExtensionInstaller):
     def __init__(self):
-        super(ACISInstaller, self).__init__(
-            version="0.1",
-            name='ACIS downloader',
+        super(ClimateInstaller, self).__init__(
+            version="1.0",
+            name='Climate downloader',
             description='WeeWX extension to download climatological data from ACIS',
             author="Thomas Keffer",
             author_email="tkeffer@gmail.com",
             config=acis_dict,
-            files=[('bin/user', ['bin/user/acis/__init__.py',
-                                 'bin/user/climate_data.py'])]
+            files=[
+                ('bin/user', [
+                    'bin/user/climate/__init__.py',
+                    'bin/user/climate/acis.py',
+                    'bin/user/climate/climate.py',
+                    'bin/user/climate/clsle.py'
+                ]),
+                ('skins/Climate', [
+                    'skins/Climate/index.html.tmpl',
+                    'skins/Climate/skin.conf'
+                ])]
         )

@@ -3,15 +3,7 @@
 #
 #    See the file LICENSE.txt for your full rights.
 #
-"""Create and manage a climatological database for WeeWX.
-
-Typical manager_dict looks like:
-{'table_name': 'climate_data',
- 'manager': 'user.climate.climate.StatsManager',
- 'database_dict': {'database_name': 'climate.sdb', 'driver': 'weedb.sqlite',
-                   'SQLITE_ROOT': '/Users/tkeffer/weewx-data/archive'}, 'schema': None}
-
-"""
+"""Create and manage a climatological database for WeeWX."""
 import datetime
 import importlib
 import logging
@@ -204,7 +196,9 @@ def setup_climate_database(database_dict, table_name):
             cursor.execute(CREATE_STATION_METADATA)
         log.debug("Climate database table initialized.")
 
+
 if __name__ == "__main__":
+    """Useful for testing, especially for creating and filling the database."""
     import weecfg
     from weewx.engine import DummyEngine
 

@@ -1,2 +1,2 @@
-0.10 14jan2026
+1.0 2026-Feb-01
 * initial version
