@@ -17,7 +17,7 @@ import weewx.xtypes
 from weeutil.weeutil import to_bool, to_int
 from weewx.engine import StdService
 
-import user.climate.clxtype
+# import user.climate.clxtype
 
 VERSION = '1.0'
 
@@ -118,8 +118,8 @@ class Climate(StdService):
                     default_station_id = station_id
 
         # Register the XType
-        self.xt = user.climate.clxtype.ClimateXType()
-        weewx.xtypes.xtypes.append(self.xt)
+        # self.xt = user.climate.clxtype.ClimateXType()
+        # weewx.xtypes.xtypes.append(self.xt)
 
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
 
