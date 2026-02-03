@@ -37,7 +37,7 @@ class Climate:
                  report_time,
                  formatter=None,
                  converter=None):
-        """Initialize an instance of DatabaseBinder.
+        """Initialize an instance of Climate.
 
         Args:
             db_lookup (function|None): A function with call signature db_lookup(data_binding),
@@ -51,6 +51,7 @@ class Climate:
                 the target unit information to be used. [Optional. If not given, the default
                 Converter will be used.]
         """
+        # Collect all data in one structure. It will make what follows easier.
         self.params = {
             'db_lookup': db_lookup,
             'report_time': report_time,
@@ -60,7 +61,9 @@ class Climate:
             'data_binding': 'climate_binding',
         }
 
+        # Until we hit the metadata database, we don't know anything about the station.
         self.name = self.location = self.latitude = self.longitude = self.altitude = None
+        # Get the metadata for the station.
         self._get_metadata()
 
     def _get_metadata(self):
@@ -129,8 +132,10 @@ class ClimateReduction:
         self.params['reduction'] = reduction
 
     def _do_query(self):
+        # For the purposes of a database query, a reduction such as 'mintime' becomes 'min'.
         reduct = self.params['reduction'].replace('time', '')
         db_manager = self.params['db_lookup'](self.params['data_binding'])
+        # Form the SQL statement to be used:
         stats_sql_stmt = ("SELECT value, usUnits, year FROM %s "
                           "WHERE station_id = ? "
                           "AND month = ? "
@@ -138,14 +143,19 @@ class ClimateReduction:
                           "AND obsType = ? "
                           "AND stat = ? "
                           "AND reduction = ?;") % db_manager.table_name
+
         report_d = datetime.date.fromtimestamp(self.params['report_time'])
+
+        # Hit the database:
         result = db_manager.getSql(stats_sql_stmt, (self.params['station_id'],
                                                     report_d.month,
                                                     report_d.day,
                                                     self.params['obs_type'],
                                                     self.params['stat'],
                                                     reduct))
+        # Did we get a result?
         if result:
+            # Yes. Create a ValueTuple from it:
             value, us_units, year = result
             if 'time' in self.params['reduction']:
                 vt = ValueTuple(year, 'count', 'group_count')

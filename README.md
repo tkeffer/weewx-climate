@@ -2,10 +2,16 @@
 
 ## About
 
-This extension downloads climatological data, stores them in a local database,
-then makes them available as a search list extension.  While the architecture
-can support multiple download sources, this first version supports only the
-US-centric [ACIS database](https://www.rcc-acis.org/) database.
+This extension allows you to add climatological data, such as record highs and
+lows for a day, to a skin. It works by downloading climatological data from
+government sources, storing them in a local database, then making them available
+as a search list extension. Here's an example of what it looks like:
+
+![Sample output](climate.png)
+
+While the architecture can support multiple download sources, this first version
+supports only the US-centric [ACIS database](https://www.rcc-acis.org/)
+database.
 
 In the future, I hope to add support for other countries.
 
@@ -17,7 +23,7 @@ In the future, I hope to add support for other countries.
 
 ### Station ID
 
-You will need to find a station ID of a nearby climatology station in order to
+You will need to find a station ID of a nearby climatology station from which to
 download data. The extension accepts many different kinds of IDs, but one of the
 more accessible is the list of [Global Historical Climatology Network daily
 (GHCNd)](https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt)
@@ -32,7 +38,97 @@ interests you.
 You can find more information about your chosen station in the NOAA
 [Historical Observing Metadata Repository](https://www.ncei.noaa.gov/access/homr/).
 
+### Installing the extension
+
+#### Run the installer
+
+The extension is installed like any other WeeWX extension:
+
+```shell
+weectl extension install https://github.com/tkeffer/weewx-climate/archive/refs/heads/master.zip 
+```
+#### Configure the extension
+
+Now you need to configure the extension to use the station ID that you chose
+above.
+.
+Go into `weewx.conf` and look for the stanza `[Climate]`. It will look something
+like this:
+
+```
+[Climate]
+    # Replace with the ACIS ID of a nearby station. See the README for more info.
+    [[USC00040983]]
+        enabled = true
+        downloader = user.climate.acis
+```
+
+Replace the station ID `USC00040983` (which is actually for Borrego Springs, CA)
+with your chosen ID.
+
+## Demonstration skin
+
+A demonstration skin called "Climate" is included and will be installed when
+you install the extension. It demonstrates how to use the tags.
+
+## Adding to the Seasons skin
+
+The climate extension can be added easily to the Seasons skin. Here's how to do
+it. 
+
+The installation process will automatically add a widget file to the Seasons
+skin called "`climate.inc`". However, to actually use it, you must make two
+changes to the Seasons skin manually:
+
+1. Look in `Seasons/index.html.tmpl` for a section that looks like this:
+    ```
+      <div id="widget_group">
+        #include "current.inc"
+        #include "sunmoon.inc"
+        #include "hilo.inc"
+        #include "sensors.inc"
+        #include "about.inc"
+        #include "radar.inc"
+        #include "satellite.inc"
+        #include "map.inc"
+      </div>
+   ```
+   
+    Add the climate widget to the list. When you're done, it should look like this:
+    ```
+      <div id="widget_group">
+        #include "current.inc"
+        #include "sunmoon.inc"
+        #include "hilo.inc"
+        #include "climate.inc"
+        #include "sensors.inc"
+        #include "about.inc"
+        #include "radar.inc"
+        #include "satellite.inc"
+        #include "map.inc"
+      </div>
+   ```
+    Note the addition of "`climate.inc`" to the list.
+
+2. Edit the stanza `[CheetahGenerator] in the file `skin.conf` in the Seasons
+   skin directory such that it can use the climate search list extension. When
+   you're done, it should look like this:
+
+    ```
+    [CheetahGenerator]
+    
+        # Possible encodings include 'html_entities', 'strict_ascii', 'normalized_ascii',
+        # as well as those listed in https://docs.python.org/3/library/codecs.html#standard-encodings
+        encoding = html_entities
+        search_list_extensions = user.climate.clsle.ClimateSLE
+   ```
+   
+That's it!
+
 ## Database schema
+
+Climatological data is stored in a SQLite database called `climate.sdb`, located
+in `SQLITE_ROOT`. Here's what the table `climate_data` looks like:
 
 ```
 station_id  month day usUnits obsType stat reduction value year
@@ -45,6 +141,8 @@ USC00040983    01  01       1  precip  sum       max  3.24 2009
 ```
 
 ## Tags
+
+Here are some sample tags that you can use in your skin.
 
 ```
 $climate.day.precip.sum.max       <-- Max precip for this day
@@ -60,8 +158,3 @@ $climate.day.outTemp.low.max      <-- Max low (high-low) temperature for this da
           │    └────────────── obs_type
           └─────────────────── period
 ```
-
-## Demonstration skin
-
-A demonstration skin called "Climate" is included and will be installed when
-you install the extension. It demonstrates how to use the tags.
