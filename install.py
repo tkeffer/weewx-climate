@@ -66,5 +66,9 @@ class ClimateInstaller(ExtensionInstaller):
                 ('skins/Climate', [
                     'skins/Climate/index.html.tmpl',
                     'skins/Climate/skin.conf'
-                ])]
+                ]),
+                ('skins/Seasons', [
+                    'skins/Seasons/climate.inc'
+                ])
+            ]
         )
