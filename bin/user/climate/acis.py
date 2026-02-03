@@ -181,9 +181,12 @@ def gen_acis_records(results, station_id):
         stat, reduction, obs_type = stat_tuple
         for day_tuple in element_list:
             # The value is in the first element. It's a string, so convert it to a float. Watch
-            # out for missing values (marked with 'M'):
-            if day_tuple[0].strip().upper() == 'M':
+            # out for missing values (marked with 'M') and "trace" (marked with 'T'):
+            val = day_tuple[0].strip().upper()
+            if val == 'M':
                 value = None
+            elif val == 'T':
+                value = 0.0
             else:
                 value = to_float(day_tuple[0])
             # The second element holds the date in the form 'YYYY-MM-DD'.
