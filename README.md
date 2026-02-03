@@ -5,7 +5,7 @@
 This extension allows you to add climatological data, such as record highs and
 lows for a day, to a skin. It works by downloading climatological data from
 government sources, storing them in a local database, then making them available
-as a search list extension. Here's an example of what it looks like:
+as a search list extension. Here's an example of what is possible:
 
 ![Sample output](climate.png)
 
