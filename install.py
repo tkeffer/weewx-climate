@@ -11,6 +11,14 @@ import configobj
 from weecfg.extension import ExtensionInstaller
 
 CONFIG = """
+[StdReport]
+
+    [[ClimateReport]]
+        # This is a report for demonstrating the tags in weewx-climate.
+        skin = Climate
+        enable = false
+        HTML_ROOT = climate
+
 [DataBindings]
     
     [[climate_binding]]

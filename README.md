@@ -10,10 +10,8 @@ as a search list extension. Here's an example of what is possible:
 ![Sample output](climate.png)
 
 While the architecture can support multiple download sources, this first version
-supports only the US-centric [ACIS database](https://www.rcc-acis.org/)
-database.
-
-In the future, I hope to add support for other countries.
+supports only the US-centric [ACIS database](https://www.rcc-acis.org/). In the
+future, I hope to add support for other countries.
 
 ## Prerequisites
 
@@ -23,10 +21,10 @@ In the future, I hope to add support for other countries.
 
 ### Station ID
 
-You will need to find a station ID of a nearby climatology station from which to
-download data. The extension accepts many different kinds of IDs, but one of the
-more accessible is the list of [Global Historical Climatology Network daily
-(GHCNd)](https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt)
+You will need to find the ACIS station ID of a nearby climatology station from
+which to download data. The extension accepts many different kinds of IDs, but
+one of the more accessible is the list of [Global Historical Climatology Network
+daily (GHCNd)](https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt)
 stations. Scan the list for a nearby station. Only USA stations will work.
 
 A more graphical interface is available at the [NOAA National Center for
@@ -69,7 +67,8 @@ with your chosen ID.
 ## Demonstration skin
 
 A demonstration skin called "Climate" is included and will be installed when
-you install the extension. It demonstrates how to use the tags.
+you install the extension. It demonstrates how to use the tags. By default,
+it is not enabled.
 
 ## Adding to the Seasons skin
 
