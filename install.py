@@ -51,11 +51,12 @@ class ClimateInstaller(ExtensionInstaller):
     def __init__(self):
         super(ClimateInstaller, self).__init__(
             version="1.0",
-            name='Climate downloader',
-            description='WeeWX extension to download climatological data from ACIS',
+            name='weewx-climate',
+            description='Download climatological data from ACIS',
             author="Thomas Keffer",
             author_email="tkeffer@gmail.com",
-            config=acis_dict,
+            data_services='user.climate.climate.Climate',
+            config=climate_dict,
             files=[
                 ('bin/user', [
                     'bin/user/climate/__init__.py',
