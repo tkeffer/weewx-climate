@@ -24,6 +24,7 @@ $climate.day.outTemp.low.max      <-- Max low (high-low) temperature for this da
 import datetime
 
 import weewx.units
+import weeutil.weeutil
 from weewx.cheetahgenerator import SearchList
 from weewx.units import ValueTuple, ValueHelper
 
@@ -37,7 +38,8 @@ class Climate:
                  db_lookup,
                  report_time,
                  formatter=None,
-                 converter=None):
+                 converter=None,
+                 skin_dict=None,):
         """Initialize an instance of Climate.
 
         Args:
@@ -58,6 +60,7 @@ class Climate:
             'report_time': report_time,
             'formatter': formatter or weewx.units.Formatter(),
             'converter': converter or weewx.units.Converter(),
+            'skin_dict': skin_dict or {},
             'station_id': default_station_id,
             'data_binding': 'climate_binding',
         }
@@ -77,7 +80,18 @@ class Climate:
             return
 
         # Unpack the results:
-        self.name, self.location, self.latitude, self.longitude, altitude, altitude_unit = results
+        self.name, self.location, latitude_f, longitude_f, altitude, altitude_unit = results
+
+        # Add a bunch of formatted attributes:
+        label_dict = self.params['skin_dict'].get('Labels', {})
+        hemispheres    = label_dict.get('hemispheres', ('N','S','E','W'))
+        latlon_formats = label_dict.get('latlon_formats')
+        self.latitude  = weeutil.weeutil.latlon_string(latitude_f,
+                                                       hemispheres[0:2],
+                                                       'lat', latlon_formats)
+        self.longitude = weeutil.weeutil.latlon_string(longitude_f,
+                                                       hemispheres[2:4],
+                                                       'lon', latlon_formats)
 
         self.altitude = ValueHelper(value_t=ValueTuple(altitude, altitude_unit, 'group_altitude'),
                                     formatter=self.params['formatter'],
@@ -201,6 +215,7 @@ class ClimateSLE(SearchList):  # 1
             db_lookup,
             timespan.stop,
             formatter=self.generator.formatter,
-            converter=self.generator.converter)
+            converter=self.generator.converter,
+            skin_dict=self.generator.skin_dict,)
 
         return [{'climate': climate}]
