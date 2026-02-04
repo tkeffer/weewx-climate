@@ -6,49 +6,104 @@
 <html lang="$lang">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Climate Records for $climate.station_id</title>
+    <title>About $climate.station_id</title>
     <link rel="icon" type="image/png" href="favicon.ico" />
     <link rel="stylesheet" type="text/css" href="seasons.css"/>
 
-
-
     <script src="seasons.js"></script>
+    <style>
+
+#climate_widget th {
+  font-weight: normal;
+  text-align: right;
+}
+#climate_widget .widget_title {
+  margin-bottom: 25px;
+}
+#climate_widget .label {
+  font-size: 100%;
+}
+#climate_widget .data {
+  font-size: 100%;
+  }
+.climate_body {
+    margin-bottom: 30px;
+    float: left;
+}
+    </style>
   </head>
 
   <body>
     #include "titlebar.inc"
 
-<div class="widget_title">Climate Records</div>
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-top: 20px;">
+    <div id="contents">
+      <p><a href="index.html">&#10096; $gettext("Current Conditions")</a></p>
 
-    <div style="flex: 1;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr><td>Location</td><td><strong>$climate.name ($climate.station_id)</strong></td></tr>
-            <tr><td>Latitude</td><td><strong>$climate.latitude</strong></td></tr>
-            <tr><td>Longitude</td><td><strong>$climate.longitude</strong></td></tr>
-            <tr><td>Altitude</td><td><strong>$climate.altitude</strong></td></tr>
-        </table>
+      <div id="widget_group">
+        <div id="climate_widget" class="widget">
+          <div class="widget_title">
+            $gettext("Climate data")
+          </div>
+          <div class="widget_contents">
+            <div id="climate_details">
+              <div class="climate_body">
+                <table class="climate">
+                  <tr><th>$gettext("About") $climate.station_id</th><th></th></tr>
+                  <tr>
+                    <td class="label">$gettext("Name")</td>
+                    <td class="data">$climate.name</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Location")</td>
+                    <td class="data">$climate.location</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Latitude")</td>
+                    <td class="data">$climate.latitude</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Longitude")</td>
+                    <td class="data">$climate.longitude</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Altitude")</td>
+                    <td class="data">$climate.altitude</td>
+                  </tr>
+                </table>
+              </div>
+              <div class="climate_body" style="margin-left:30px;">
+                <table class="climate">
+                  <tr><th>Temperatures</th><th></th></tr>
+                  <tr>
+                    <td class="label">$gettext("Maximum high")</td>
+                    <td class="data">$climate.day.outTemp.high.max ($climate.day.outTemp.high.maxtime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Minimum high")</td>
+                    <td class="data">$climate.day.outTemp.high.min ($climate.day.outTemp.high.mintime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Average high")</td>
+                    <td class="data">$climate.day.outTemp.high.avg/td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Maximum low")</td>
+                    <td class="data">$climate.day.outTemp.low.max ($climate.day.outTemp.low.maxtime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Minimum low")</td>
+                    <td class="data">$climate.day.outTemp.low.min ($climate.day.outTemp.low.mintime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Average low")</td>
+                    <td class="data">$climate.day.outTemp.low.avg</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div style="flex: 1;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr><td>All-Time High</td><td><strong>$climate.day.outTemp.high.max</strong></td><td>($climate.day.outTemp.high.maxtime)</td></tr>
-            <tr><td>Lowest High</td><td><strong>$climate.day.outTemp.high.min</strong></td><td>($climate.day.outTemp.high.mintime)</td></tr>
-            <tr><td>Average High</td><td><strong>$climate.day.outTemp.avg</strong></td><td>&nbsp;</td></tr>
-            <tr><td colspan="3"><hr></td></tr>
-            <tr><td>All-Time Low</td><td><strong>$climate.day.outTemp.low.min</strong></td><td>($climate.day.outTemp.low.mintime)</td></tr>
-            <tr><td>Highest Low</td><td><strong>$climate.day.outTemp.low.max</strong></td><td>($climate.day.outTemp.maxtime)</td></tr>
-            <tr><td>Average Low</td><td><strong>$climate.day.outTemp.avg</strong></td><td>&nbsp;</td></tr>
-        </table>
-    </div>
-
-</div>
-
-
-    <p class="footnote">
-      $gettext("This station is controlled by <a href='https://weewx.com'>WeeWX</a>, an experimental weather software system written in Python.")
-    </p>
-
   </body>
-
 </html>
