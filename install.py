@@ -58,7 +58,7 @@ def loader():
 class ClimateInstaller(ExtensionInstaller):
     def __init__(self):
         super(ClimateInstaller, self).__init__(
-            version="1.0",
+            version="1.1",
             name='weewx-climate',
             description='Download climatological data from ACIS',
             author="Thomas Keffer",

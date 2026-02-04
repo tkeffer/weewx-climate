@@ -19,7 +19,7 @@ from weewx.engine import StdService
 
 # import user.climate.clxtype
 
-VERSION = '1.0'
+VERSION = '1.1'
 
 log = logging.getLogger(__name__)
 

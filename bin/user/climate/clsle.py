@@ -22,16 +22,19 @@ $climate.day.outTemp.low.max      <-- Max low (high-low) temperature for this da
 """
 
 import datetime
+import math
 
 import weewx.units
 import weeutil.weeutil
 from weewx.cheetahgenerator import SearchList
 from weewx.units import ValueTuple, ValueHelper
+from weewx.uwxutils import TWxUtils
 
 from user.climate.climate import default_station_id
 
 weewx.units.obs_group_dict.setdefault('precip', 'group_rain')
 
+earth_radius = TWxUtils.earthRadius45   # In km
 
 class Climate:
     def __init__(self,
@@ -39,7 +42,8 @@ class Climate:
                  report_time,
                  formatter=None,
                  converter=None,
-                 skin_dict=None,):
+                 skin_dict=None,
+                 console_info=None,):
         """Initialize an instance of Climate.
 
         Args:
@@ -53,6 +57,8 @@ class Climate:
             converter (weewx.units.Converter|None): An instance of weewx.units.Converter() holding
                 the target unit information to be used. [Optional. If not given, the default
                 Converter will be used.]
+            skin_dict (dict|None): The skin dictionary as received from the generator. [Optional.]
+            console_info (weewx.station.StationInfo|None): Information about the console station.
         """
         # Collect all data in one structure. It will make what follows easier.
         self.params = {
@@ -61,6 +67,7 @@ class Climate:
             'formatter': formatter or weewx.units.Formatter(),
             'converter': converter or weewx.units.Converter(),
             'skin_dict': skin_dict or {},
+            'console_info': console_info,
             'station_id': default_station_id,
             'data_binding': 'climate_binding',
         }
@@ -80,16 +87,16 @@ class Climate:
             return
 
         # Unpack the results:
-        self.name, self.location, latitude_f, longitude_f, altitude, altitude_unit = results
+        self.name, self.location, self.latitude_f, self.longitude_f, altitude, altitude_unit = results
 
         # Add a bunch of formatted attributes:
         label_dict = self.params['skin_dict'].get('Labels', {})
         hemispheres    = label_dict.get('hemispheres', ('N','S','E','W'))
         latlon_formats = label_dict.get('latlon_formats')
-        self.latitude  = weeutil.weeutil.latlon_string(latitude_f,
+        self.latitude  = weeutil.weeutil.latlon_string(self.latitude_f,
                                                        hemispheres[0:2],
                                                        'lat', latlon_formats)
-        self.longitude = weeutil.weeutil.latlon_string(longitude_f,
+        self.longitude = weeutil.weeutil.latlon_string(self.longitude_f,
                                                        hemispheres[2:4],
                                                        'lon', latlon_formats)
 
@@ -113,10 +120,20 @@ class Climate:
     def __getattr__(self, period):
         return ClimatePeriod(period, **self.params)
 
-    def day(self):
-        """Record statistics for a particular day."""
-        return ClimatePeriod('day', **self.params, )
+    def distance(self):
+        """Distance from the console station."""
+        # Convert everything to radians:
+        lat_console = math.radians(self.params['console_info'].latitude_f)
+        lon_console = math.radians(self.params['console_info'].longitude_f)
+        lat_station = math.radians(self.latitude_f)
+        lon_station = math.radians(self.longitude_f)
 
+        avg_lat = (lat_console + lat_station) / 2
+        x = (lon_console - lon_station) * math.cos(avg_lat)
+        y = (lat_console - lat_station)
+        d = earth_radius*math.sqrt(x**2 + y**2)
+        d_vt = ValueTuple(d, 'km', 'group_distance')
+        return ValueHelper(d_vt, formatter=self.params['formatter'], converter=self.params['converter'])
 
 class ClimatePeriod:
     def __init__(self, period, **params):
@@ -216,6 +233,8 @@ class ClimateSLE(SearchList):  # 1
             timespan.stop,
             formatter=self.generator.formatter,
             converter=self.generator.converter,
-            skin_dict=self.generator.skin_dict,)
+            skin_dict=self.generator.skin_dict,
+            console_info=self.generator.stn_info,
+        )
 
         return [{'climate': climate}]

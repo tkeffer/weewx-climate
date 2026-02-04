@@ -151,6 +151,7 @@ $climate.location                 <-- Station location
 $climate.latitude                 <-- Latitude of station
 $climate.longitude                <-- Longitude of station
 $climate.altitude                 <-- Altitude of station
+$climate.distance                 <-- Distance from climate station to weather station
 
 $climate.day.precip.sum.max       <-- Max precip for this day
 $climate.day.precip.sum.maxtime   <-- Year of the max precip
