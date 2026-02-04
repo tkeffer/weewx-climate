@@ -75,9 +75,11 @@ it is not enabled.
 The climate extension can be added easily to the Seasons skin. Here's how to do
 it. 
 
-The installation process will automatically add a widget file to the Seasons
-skin called "`climate.inc`". However, to actually use it, you must make two
-changes to the Seasons skin manually:
+The installation process will automatically add two files to the Seasons skin: 
+- A widget file called `climate.inc`
+- A template file called `climate.html.tmpl`
+
+To use them you must make three changes to the Seasons skin manually:
 
 1. Look in `Seasons/index.html.tmpl` for a section that looks like this:
     ```
@@ -122,7 +124,21 @@ changes to the Seasons skin manually:
         search_list_extensions = user.climate.clsle.ClimateSLE
    ```
    
-That's it!
+3. In the same stanza `[CheetahGenerator]`, add the `climate.html.tmpl` file to
+the list of templates to be processed. When you're done, it will look something
+like this:
+
+    ```
+        ...
+        [[[statistics]]]
+            template = statistics.html.tmpl
+        [[[climate]]]
+            template = climate.html.tmpl
+        [[[telemetry]]]
+            template = telemetry.html.tmpl
+        ...
+   ```
+    Note the addition of the `[[[climate]]]` stanza.
 
 ## Tags
 
