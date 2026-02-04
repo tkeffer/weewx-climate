@@ -1,0 +1,55 @@
+## Copyright 2026 Tom Keffer
+## Distributed under terms of GPLv3.  See LICENSE.txt for your rights.
+#errorCatcher Echo
+
+<!DOCTYPE html>
+<html lang="$lang">
+  <head>
+    <meta charset="UTF-8">
+    <title>Climate Records for $climate.location ($climate.station_id)</title>
+    <link rel="icon" type="image/png" href="favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="seasons.css"/>
+    #if $climate.station_url
+    <link rel="canonical" href="$climate.station_url/$filename" />
+    #end if
+    <script src="seasons.js"></script>
+  </head>
+
+  <body onload="setup();">
+    #include "titlebar.inc"
+
+
+<h3 style="margin-top: 0;">Climatological Station Information</h3>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-top: 20px;">
+
+    <div style="flex: 1;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr><td>Location</td><td><strong>$climate.name ($climate.station_id)</strong></td></tr>
+            <tr><td>Latitude</td><td><strong>$climate.latitude</strong></td></tr>
+            <tr><td>Longitude</td><td><strong>$climate.longitude</strong></td></tr>
+            <tr><td>Altitude</td><td><strong>$climate.altitude</strong></td></tr>
+        </table>
+    </div>
+
+    <div style="flex: 1;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr><td>All-Time High</td><td><strong>$climate.day.outTemp.high.max</strong></td><td>($climate.day.outTemp.high.maxtime)</td></tr>
+            <tr><td>Lowest High</td><td><strong>$climate.day.outTemp.high.min</strong></td><td>($climate.day.outTemp.high.mintime)</td></tr>
+            <tr><td>Average High</td><td><strong>$climate.day.outTemp.avg</strong></td><td>&nbsp;</td></tr>
+            <tr><td colspan="3"><hr></td></tr>
+            <tr><td>All-Time Low</td><td><strong>$climate.day.outTemp.low.min</strong></td><td>($climate.day.outTemp.low.mintime)</td></tr>
+            <tr><td>Highest Low</td><td><strong>$climate.day.outTemp.low.max</strong></td><td>($climate.day.outTemp.maxtime)</td></tr>
+            <tr><td>Average Low</td><td><strong>$climate.day.outTemp.avg</strong></td><td>&nbsp;</td></tr>
+        </table>
+    </div>
+
+</div>
+
+
+    <p class="footnote">
+      $gettext("This station is controlled by <a href='https://weewx.com'>WeeWX</a>, an experimental weather software system written in Python.")
+    </p>
+
+  </body>
+
+</html>

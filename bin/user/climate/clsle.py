@@ -31,6 +31,7 @@ from user.climate.climate import default_station_id
 
 weewx.units.obs_group_dict.setdefault('precip', 'group_rain')
 
+
 class Climate:
     def __init__(self,
                  db_lookup,
@@ -69,11 +70,18 @@ class Climate:
     def _get_metadata(self):
         db_manager = self.params['db_lookup'](self.params['data_binding'])
         results = db_manager.getSql("SELECT station_name, station_location, "
-                                    "latitude, longitude, altitude "
+                                    "latitude, longitude, altitude, altitude_unit "
                                     "FROM station_metadata "
                                     "WHERE station_id=?", (self.params['station_id'],))
-        if results:
-            self.name, self.location, self.latitude, self.longitude, self.altitude = results
+        if not results:
+            return
+
+        # Unpack the results:
+        self.name, self.location, self.latitude, self.longitude, altitude, altitude_unit = results
+
+        self.altitude = ValueHelper(value_t=ValueTuple(altitude, altitude_unit, 'group_altitude'),
+                                    formatter=self.params['formatter'],
+                                    converter=self.params['converter'])
 
     def __call__(self, station_id=None, data_binding=None):
         """Set a new station ID or data binding."""

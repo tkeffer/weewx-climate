@@ -34,7 +34,8 @@ CREATE_STATION_METADATA = "CREATE TABLE station_metadata " \
                           "(station_id TEXT PRIMARY KEY, " \
                           "station_name TEXT, " \
                           "station_location TEXT, " \
-                          "latitude REAL, longitude REAL, altitude REAL, " \
+                          "latitude REAL, longitude REAL, " \
+                          "altitude REAL, altitude_unit TEXT, " \
                           "last_download TEXT);"
 
 default_binding_dict = {

@@ -1,6 +1,6 @@
 <div id="climate_widget" class="widget">
   <div class="widget_title">
-    On this day
+    <a href="climate.html">On this day</a>
   </div>
   <div class="widget_content" style="display:block;">
     <table style="width:100%;">
