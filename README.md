@@ -124,26 +124,18 @@ changes to the Seasons skin manually:
    
 That's it!
 
-## Database schema
-
-Climatological data is stored in a SQLite database called `climate.sdb`, located
-in `SQLITE_ROOT`. Here's what the table `climate_data` looks like:
-
-```
-station_id  month day usUnits obsType stat reduction value year
-USC00040983    01  01       1 outTemp high       min    41 2018
-USC00040983    01  01       1 outTemp high       avg    38 null
-USC00040983    01  01       1 outTemp high       max    55 2004
-USC00040983    01  01       1  precip  sum       avg  0.12 null
-USC00040983    01  01       1  precip  sum       max  3.24 2009
-...
-```
-
 ## Tags
 
 Here are some sample tags that you can use in your skin.
 
 ```
+$climate.station_id               <-- Station ID
+$climate.name                     <-- Station name
+$climate.location                 <-- Station location
+$climate.latitude                 <-- Latitude of station
+$climate.longitude                <-- Longitude of station
+$climate.altitude                 <-- Altitude of station
+
 $climate.day.precip.sum.max       <-- Max precip for this day
 $climate.day.precip.sum.maxtime   <-- Year of the max precip
 $climate.day.outTemp.high.max     <-- Max high (high-high) temperature for this day
@@ -157,3 +149,52 @@ $climate.day.outTemp.low.max      <-- Max low (high-low) temperature for this da
           │    └────────────── obs_type
           └─────────────────── period
 ```
+
+## Using more than one climate station
+
+It is possible to download data from more than one climatological station.
+Simply add more stanzas to the `[Climate]` section of `weewx.conf`. For example,
+to download data from both the SJC and SFO airports in the San Francisco, CA
+area, your `[Climate]` section would look like this:
+
+```
+[Climate]
+    # SJC airport:
+    [[USW00023293]]
+        enabled = true
+        downloader = user.climate.acis
+
+    # SFO airport:
+    [[USW00023234]]
+        enabled = true
+        downloader = user.climate.acis
+```
+
+The first station listed will be the "default" station. Other stations can be
+referenced by adding a `station_id` parameter to `$climate`. For example,
+
+    $climate.day.precip.sum.max
+
+would return the maximum precipitation for the default station, which is SJC,
+while
+
+    $climate(station_id=USW00023234).day.precip.sum.max
+
+would return the maximum precipitation for SFO.
+
+## Database schema
+
+Climatological data is stored in a SQLite database called `climate.sdb`, located
+in `SQLITE_ROOT`. For reference, here's what the table `climate_data` inside the
+database, looks like:
+
+```
+station_id  month day usUnits obsType stat reduction value year
+USC00040983    01  01       1 outTemp high       min    41 2018
+USC00040983    01  01       1 outTemp high       avg    38 null
+USC00040983    01  01       1 outTemp high       max    55 2004
+USC00040983    01  01       1  precip  sum       avg  0.12 null
+USC00040983    01  01       1  precip  sum       max  3.24 2009
+...
+```
+
