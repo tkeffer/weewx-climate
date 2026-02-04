@@ -1,25 +1,24 @@
 ## Copyright 2026 Tom Keffer
 ## Distributed under terms of GPLv3.  See LICENSE.txt for your rights.
 #errorCatcher Echo
-
+#encoding UTF-8
 <!DOCTYPE html>
 <html lang="$lang">
   <head>
-    <meta charset="UTF-8">
-    <title>Climate Records for $climate.location ($climate.station_id)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Climate Records for $climate.station_id</title>
     <link rel="icon" type="image/png" href="favicon.ico" />
     <link rel="stylesheet" type="text/css" href="seasons.css"/>
-    #if $climate.station_url
-    <link rel="canonical" href="$climate.station_url/$filename" />
-    #end if
+
+
+
     <script src="seasons.js"></script>
   </head>
 
-  <body onload="setup();">
+  <body>
     #include "titlebar.inc"
 
-
-<h3 style="margin-top: 0;">Climatological Station Information</h3>
+<div class="widget_title">Climate Records</div>
 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-top: 20px;">
 
     <div style="flex: 1;">
