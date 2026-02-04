@@ -62,6 +62,8 @@ def acis_struct(station_id):
             acis_element('mint', 'max'),
             acis_element('mint', 'min'),
             acis_element('pcpn', 'max'),
+            acis_element('pcpn', 'min'),
+            acis_element('pcpn', 'mean'),
         ]
     }
 
@@ -177,7 +179,7 @@ def gen_acis_records(results, station_id):
     # function acis_struct() above.
     ordering = [('high', 'avg', 'outTemp'), ('high', 'max', 'outTemp'), ('high', 'min', 'outTemp'),
                 ('low', 'avg', 'outTemp'), ('low', 'max', 'outTemp'), ('low', 'min', 'outTemp'),
-                ('sum', 'max', 'precip')]
+                ('sum', 'max', 'precip'), ('sum', 'min', 'precip'), ('sum', 'avg', 'precip')]
 
     # Scan through the 6 different statistics and reduction methods returned from the server
     for stat_tuple, element_list in zip(ordering, results['smry']):

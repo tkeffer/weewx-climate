@@ -73,7 +73,7 @@
               </div>
               <div class="climate_body" style="margin-left:30px;">
                 <table class="climate">
-                  <tr><th>Temperatures</th><th></th></tr>
+                  <tr><th>$gettext("Temperatures")</th><th></th></tr>
                   <tr>
                     <td class="label">$gettext("Maximum high")</td>
                     <td class="data">$climate.day.outTemp.high.max ($climate.day.outTemp.high.maxtime)</td>
@@ -84,7 +84,7 @@
                   </tr>
                   <tr>
                     <td class="label">$gettext("Average high")</td>
-                    <td class="data">$climate.day.outTemp.high.avg/td>
+                    <td class="data">$climate.day.outTemp.high.avg</td>
                   </tr>
                   <tr>
                     <td class="label">$gettext("Maximum low")</td>
@@ -97,6 +97,21 @@
                   <tr>
                     <td class="label">$gettext("Average low")</td>
                     <td class="data">$climate.day.outTemp.low.avg</td>
+                  </tr>
+                </table>
+                <table class="climate" style="margin-top:30px;">
+                  <tr><th>$gettext("Precipitation")</th><th></th></tr>
+                  <tr>
+                    <td class="label">$gettext("Maximum")</td>
+                    <td class="data">$climate.day.precip.sum.max ($climate.day.precip.sum.maxtime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Minimum")</td>
+                    <td class="data">$climate.day.precip.sum.min ($climate.day.precip.sum.mintime)</td>
+                  </tr>
+                  <tr>
+                    <td class="label">$gettext("Average")</td>
+                    <td class="data">$climate.day.precip.sum.avg</td>
                   </tr>
                 </table>
               </div>
