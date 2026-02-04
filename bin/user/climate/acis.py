@@ -100,15 +100,18 @@ def get_metadata(cursor, station_id):
             'latitude': data['ll'][1],
             'longitude': data['ll'][0],
             'altitude': data['elev'],
+            'altitude_unit': 'foot',
             'last_download': None,
             }
     # Insert it into the station_metadata table
-    cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?, ?);",
+    cursor.execute("INSERT OR REPLACE INTO station_metadata VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
                    (meta['station_id'],
                     meta['station_name'],
                     meta['station_location'],
-                    meta['latitude'], meta['longitude'],
+                    meta['latitude'],
+                    meta['longitude'],
                     meta['altitude'],
+                    meta['altitude_unit'],
                     meta['last_download']))
     log.debug(f"Metadata for station {station_id} inserted into database.")
 
@@ -180,17 +183,21 @@ def gen_acis_records(results, station_id):
     for stat_tuple, element_list in zip(ordering, results['smry']):
         stat, reduction, obs_type = stat_tuple
         for day_tuple in element_list:
-            # The value is in the first element. It's a string, so convert it to a float. Watch
-            # out for missing values (marked with 'M') and "trace" (marked with 'T'):
-            val = day_tuple[0].strip().upper()
-            if val == 'M':
-                value = None
-            elif val == 'T':
-                value = 0.0
-            else:
-                value = to_float(day_tuple[0])
-            # The second element holds the date in the form 'YYYY-MM-DD'.
-            year, month, day = [to_int(e) for e in day_tuple[1].split('-')]
+            # Put the following in a try block in case of malformed data
+            try:
+                # The value is in the first element. It's a string, so convert it to a float. Watch
+                # out for missing values (marked with 'M') and "trace" (marked with 'T'):
+                val = day_tuple[0].strip().upper()
+                if val == 'M':
+                    value = None
+                elif val == 'T':
+                    value = 0.0
+                else:
+                    value = to_float(day_tuple[0])
+                # The second element holds the date in the form 'YYYY-MM-DD'.
+                year, month, day = [to_int(e) for e in day_tuple[1].split('-')]
+            except ValueError:
+                continue
             # There is no record year for reduction methods of 'avg':
             if reduction == 'avg':
                 year = None
