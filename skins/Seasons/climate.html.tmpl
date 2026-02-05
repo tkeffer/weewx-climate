@@ -42,13 +42,17 @@
       <div id="widget_group">
         <div id="climate_widget" class="widget">
           <div class="widget_title">
-            $gettext("Climate data")
+            $gettext("Climate records for") $current.dateTime.format("%x")
           </div>
           <div class="widget_contents">
             <div id="climate_details">
               <div class="climate_body">
                 <table class="climate">
-                  <tr><th>$gettext("About") $climate.station_id</th><th></th></tr>
+                  <tr><th>$gettext("Station information")</th><th></th></tr>
+                  <tr>
+                    <td class="label">$gettext("Station ID")</td>
+                    <td class="data">$climate.station_id</td>
+
                   <tr>
                     <td class="label">$gettext("Name")</td>
                     <td class="data">$climate.name</td>
