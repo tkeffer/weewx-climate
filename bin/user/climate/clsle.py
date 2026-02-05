@@ -24,8 +24,8 @@ $climate.day.outTemp.low.max      <-- Max low (high-low) temperature for this da
 import datetime
 import math
 
-import weewx.units
 import weeutil.weeutil
+import weewx.units
 from weewx.cheetahgenerator import SearchList
 from weewx.units import ValueTuple, ValueHelper
 from weewx.uwxutils import TWxUtils
@@ -34,7 +34,8 @@ from user.climate.climate import default_station_id
 
 weewx.units.obs_group_dict.setdefault('precip', 'group_rain')
 
-earth_radius = TWxUtils.earthRadius45   # In km
+earth_radius = TWxUtils.earthRadius45  # In km
+
 
 class Climate:
     def __init__(self,
@@ -43,7 +44,7 @@ class Climate:
                  formatter=None,
                  converter=None,
                  skin_dict=None,
-                 console_info=None,):
+                 console_info=None, ):
         """Initialize an instance of Climate.
 
         Args:
@@ -91,11 +92,11 @@ class Climate:
 
         # Add a bunch of formatted attributes:
         label_dict = self.params['skin_dict'].get('Labels', {})
-        hemispheres    = label_dict.get('hemispheres', ('N','S','E','W'))
+        hemispheres = label_dict.get('hemispheres', ('N', 'S', 'E', 'W'))
         latlon_formats = label_dict.get('latlon_formats')
-        self.latitude  = weeutil.weeutil.latlon_string(self.latitude_f,
-                                                       hemispheres[0:2],
-                                                       'lat', latlon_formats)
+        self.latitude = weeutil.weeutil.latlon_string(self.latitude_f,
+                                                      hemispheres[0:2],
+                                                      'lat', latlon_formats)
         self.longitude = weeutil.weeutil.latlon_string(self.longitude_f,
                                                        hemispheres[2:4],
                                                        'lon', latlon_formats)
@@ -131,9 +132,12 @@ class Climate:
         avg_lat = (lat_console + lat_station) / 2
         x = (lon_console - lon_station) * math.cos(avg_lat)
         y = (lat_console - lat_station)
-        d = earth_radius*math.sqrt(x**2 + y**2)
+        d = earth_radius * math.sqrt(x ** 2 + y ** 2)
         d_vt = ValueTuple(d, 'km', 'group_distance')
-        return ValueHelper(d_vt, formatter=self.params['formatter'], converter=self.params['converter'])
+        return ValueHelper(d_vt,
+                           formatter=self.params['formatter'],
+                           converter=self.params['converter'])
+
 
 class ClimatePeriod:
     def __init__(self, period, **params):
