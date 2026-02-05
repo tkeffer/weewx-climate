@@ -1,8 +1,17 @@
+## Climatological widget for the Seasons skin
+## Copyright 2026 Tom Keffer
+## Distributed under terms of GPLv3.  See LICENSE.txt for your rights.
+## See LICENSE.txt for your rights
+#errorCatcher Echo
+#encoding UTF-8
+
 <div id="climate_widget" class="widget">
   <div class="widget_title">
     <a href="climate.html">$gettext("On this day")</a>
+    <a class="widget_control"
+       onclick="toggle_widget('climate')">&diams;</a>
   </div>
-  <div class="widget_content" style="display:block;">
+  <div class="widget_contents" style="display:block;">
     <table style="width:100%;">
       <tbody>
         <tr>
