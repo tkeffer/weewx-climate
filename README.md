@@ -2,8 +2,8 @@
 
 ## About
 
-This extension allows you to add climatological data, such as record highs and
-lows for a day, to a skin. It works by downloading climatological data from
+This extension allows you to add data, such as record highs and lows for a day,
+to a skin from nearby climatological stations. It works by downloading data from
 government sources, storing them in a local database, then making them available
 as a search list extension. Here's an example of what is possible:
 
@@ -16,6 +16,7 @@ future, I hope to add support for other countries.
 ## Prerequisites
 
 - Python 3.7+
+- WeeWX V4.6+
 
 ## Installation
 
@@ -151,10 +152,11 @@ $climate.location                 <-- Station location
 $climate.latitude                 <-- Latitude of station
 $climate.longitude                <-- Longitude of station
 $climate.altitude                 <-- Altitude of station
-$climate.distance                 <-- Distance from climate station to weather station
+$climate.distance                 <-- Distance to your weather station
 
 $climate.day.precip.sum.max       <-- Max precip for this day
 $climate.day.precip.sum.maxtime   <-- Year of the max precip
+$climate.day.precip.sum.avg       <-- Average precip for this day
 $climate.day.outTemp.high.max     <-- Max high (high-high) temperature for this day
 $climate.day.outTemp.high.maxtime <-- Year of the max high temperature
 $climate.day.outTemp.high.avg     <-- Average high temperature for this day
