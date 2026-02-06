@@ -170,6 +170,8 @@ class Climate(StdService):
             self.stations[station_id]['thread'] = threading.Thread(
                 target=self.stations[station_id]['downloader'].fetch_station_data,
                 args=(self.config_dict, station_id, current_date))
+            # Don't prevent the program from exiting on my account:
+            self.stations[station_id]['thread'].daemon = True
             self.stations[station_id]['thread'].start()
             self.stations[station_id]['launch_time'] = time.time()
         except threading.ThreadError:
