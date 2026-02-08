@@ -16,7 +16,7 @@ future, I hope to add support for other countries.
 ## Prerequisites
 
 - Python 3.7+
-- WeeWX V4.6+
+- WeeWX V4.6+ (V5.3+ if you want label localizations)
 
 ## Installation
 

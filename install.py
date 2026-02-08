@@ -58,7 +58,7 @@ def loader():
 class ClimateInstaller(ExtensionInstaller):
     def __init__(self):
         super(ClimateInstaller, self).__init__(
-            version="1.2",
+            version="1.3",
             name='weewx-climate',
             description='Download climatological data from ACIS',
             author="Thomas Keffer",
@@ -77,7 +77,17 @@ class ClimateInstaller(ExtensionInstaller):
                     'skins/Climate/skin.conf'
                 ]),
                 ('skins/Seasons', [
-                    'skins/Seasons/climate.inc'
+                    'skins/Seasons/climate.inc',
+                    'skins/Seasons/climate.html.tmpl',
+                    'skins/Seasons/lang/lang-climate/cz.conf',
+                    'skins/Seasons/lang/lang-climate/de.conf',
+                    'skins/Seasons/lang/lang-climate/es.conf',
+                    'skins/Seasons/lang/lang-climate/fi.conf',
+                    'skins/Seasons/lang/lang-climate/fr.conf',
+                    'skins/Seasons/lang/lang-climate/gr.conf',
+                    'skins/Seasons/lang/lang-climate/it.conf',
+                    'skins/Seasons/lang/lang-climate/nl.conf',
+                    'skins/Seasons/lang/lang-climate/no.conf',
                 ])
             ]
         )

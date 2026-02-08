@@ -1,3 +1,6 @@
+1.3 2026-Feb-08
+* Added localization files for many languages. Requires WeeWX V5.3 or later.
+
 1.2 2026-Feb-05
 * Add date to climate widget
 
